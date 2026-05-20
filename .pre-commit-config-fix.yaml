@@ -1,0 +1,16 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: google-java-format
+        name: google-java-format
+        language: system
+        entry: google-java-format --replace
+        types: [java]
