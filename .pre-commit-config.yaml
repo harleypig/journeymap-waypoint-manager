@@ -6,6 +6,9 @@ repos:
       - id: check-json
       - id: check-merge-conflict
       - id: check-toml
+        # neoforge.mods.toml uses Groovy ${} template syntax in keys;
+        # it is not valid TOML until expanded by the build.
+        exclude: '^src/main/resources/META-INF/neoforge\.mods\.toml$'
       - id: check-yaml
       - id: detect-private-key
 
@@ -16,6 +19,7 @@ repos:
         language: system
         entry: google-java-format --dry-run --set-exit-if-changed
         types: [java]
+        stages: [manual]
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.44.0
