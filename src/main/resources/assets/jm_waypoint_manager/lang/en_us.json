@@ -1,0 +1,13 @@
+{
+  "itemGroup.jm_waypoint_manager": "JourneyMap Waypoint Manager",
+  "block.jm_waypoint_manager.example_block": "Example Block",
+  "item.jm_waypoint_manager.example_item": "Example Item",
+
+  "jm_waypoint_manager.configuration.title": "JourneyMap Waypoint Manager Configs",
+  "jm_waypoint_manager.configuration.section.jm_waypoint_manager.common.toml": "JourneyMap Waypoint Manager Configs",
+  "jm_waypoint_manager.configuration.section.jm_waypoint_manager.common.toml.title": "JourneyMap Waypoint Manager Configs",
+  "jm_waypoint_manager.configuration.items": "Item List",
+  "jm_waypoint_manager.configuration.logDirtBlock": "Log Dirt Block",
+  "jm_waypoint_manager.configuration.magicNumberIntroduction": "Magic Number Text",
+  "jm_waypoint_manager.configuration.magicNumber": "Magic Number"
+}

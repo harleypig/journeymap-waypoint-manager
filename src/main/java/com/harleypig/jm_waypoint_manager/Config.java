@@ -1,4 +1,4 @@
-package com.example.examplemod;
+package com.harleypig.jm_waypoint_manager;
 
 import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
