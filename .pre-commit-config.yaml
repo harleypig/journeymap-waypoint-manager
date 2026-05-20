@@ -12,14 +12,10 @@ repos:
       - id: check-yaml
       - id: detect-private-key
 
-  - repo: local
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.16.0
     hooks:
-      - id: google-java-format-check
-        name: google-java-format (check)
-        language: system
-        entry: google-java-format --dry-run --set-exit-if-changed
-        types: [java]
-        stages: [manual]
+      - id: pretty-format-java
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.44.0

@@ -7,10 +7,8 @@ repos:
         args: ['--fix=lf']
       - id: trailing-whitespace
 
-  - repo: local
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.16.0
     hooks:
-      - id: google-java-format
-        name: google-java-format
-        language: system
-        entry: google-java-format --replace
-        types: [java]
+      - id: pretty-format-java
+        args: [--autofix]
