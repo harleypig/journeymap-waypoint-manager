@@ -142,6 +142,65 @@ MVP scope: two commands that work in-game, one export format (JSON array).
 
 ---
 
+## Phase 6 — Code Quality Hooks
+
+Expand pre-commit coverage once the Gradle scaffold (Phase 1) is in
+place and Java sources exist to lint.
+
+- [ ] **SpotBugs** — static bug analysis. Integrate via Gradle task
+  (`./gradlew spotbugsMain`) and wire as a pre-commit local hook.
+  Use `com.github.spotbugs` Gradle plugin. Treat all findings as
+  errors; suppress only with documented justification.
+
+- [ ] **Spotless** — opinionated formatter (wraps google-java-format).
+  Add `com.diffplug.spotless` Gradle plugin, configure
+  `googleJavaFormat()` in the `java` block. Wire two hooks:
+  - check: `./gradlew spotlessCheck` (in `.pre-commit-config.yaml`)
+  - fix: `./gradlew spotlessApply` (in `.pre-commit-config-fix.yaml`)
+  Use `macisamuele/language-formatters-pre-commit-hooks` as an
+  alternative if a non-Gradle hook is preferred (hook ID:
+  `pretty-format-java`, latest rev via
+  `gh api repos/macisamuele/language-formatters-pre-commit-hooks/tags`).
+
+- [ ] **Dependency security scan** — check for known CVEs in
+  dependencies. Candidates:
+  - OWASP Dependency-Check Gradle plugin
+    (`org.owasp:dependency-check-gradle`) — comprehensive NVD scan.
+  - `./gradlew dependencyCheckAnalyze` as a manual-stage pre-commit
+    hook (slow; not appropriate for every commit).
+  Confirm the correct plugin and hook approach once the dependency
+  tree is established in Phase 2.
+
+- [ ] **Checkstyle / PMD** (optional) — evaluate after SpotBugs is
+  wired. Avoid adding both unless each catches distinct classes of
+  issue; overlapping linters add noise without value.
+
+---
+
+## Phase 7 — GitHub Actions CI
+
+Set up automated CI so every push and PR is verified without manual
+intervention.
+
+- [ ] Create `.github/workflows/build.yml`:
+  - Trigger on `push` and `pull_request` to `main`/`master`.
+  - Steps: checkout → set up Java 21 → `./gradlew build`
+  - Cache Gradle wrapper and dependencies for faster runs.
+
+- [ ] Add a `pre-commit` CI job:
+  - Use `pre-commit/action` or invoke `pre-commit run --all-files`
+    directly.
+  - Run only the check config (`.pre-commit-config.yaml`), never
+    the fix config.
+
+- [ ] Add a SpotBugs/Spotless check job once Phase 6 is complete.
+
+- [ ] Consider a release workflow: on tag push matching `v*`, run
+  `./gradlew build` and upload the output jar as a GitHub release
+  asset via `gh release create`.
+
+---
+
 ## Notes
 
 - The export JSON format is your own design, not JourneyMap's internal
