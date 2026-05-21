@@ -1,6 +1,7 @@
 package com.harleypig.jm_waypoint_manager;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -20,6 +21,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 public class WaypointCommand {
 
+  private static final String FILENAME_ARG = "filename";
+
   public static void onRegisterCommands(RegisterCommandsEvent event) {
     register(event.getDispatcher());
   }
@@ -32,18 +35,19 @@ public class WaypointCommand {
                 Commands.literal("export")
                     .executes(ctx -> doExport(ctx, "waypoints"))
                     .then(
-                        Commands.argument("filename", filenameArg)
+                        Commands.argument(FILENAME_ARG, filenameArg)
                             .executes(
                                 ctx ->
-                                    doExport(ctx, StringArgumentType.getString(ctx, "filename")))))
+                                    doExport(
+                                        ctx, StringArgumentType.getString(ctx, FILENAME_ARG)))))
             .then(
                 Commands.literal("import")
                     .then(
-                        Commands.argument("filename", filenameArg)
+                        Commands.argument(FILENAME_ARG, filenameArg)
                             .executes(
                                 ctx ->
                                     doImport(
-                                        ctx, StringArgumentType.getString(ctx, "filename"))))));
+                                        ctx, StringArgumentType.getString(ctx, FILENAME_ARG))))));
   }
 
   @SuppressFBWarnings(
@@ -113,7 +117,7 @@ public class WaypointCommand {
     JsonObject json;
     try {
       json = WaypointSerializer.fromJsonString(content);
-    } catch (Exception e) {
+    } catch (JsonParseException | IllegalStateException e) {
       ctx.getSource()
           .sendFailure(
               Component.literal("Invalid JSON in " + file.getFileName() + ": " + e.getMessage()));

@@ -251,26 +251,28 @@ Blocked on open design questions above.
   active: find-sec-bugs (security patterns) and fb-contrib/sb-contrib
   (extended correctness/performance patterns).
 
-- [ ] **OWASP Dependency-Check** — scans dependencies for known CVEs
-  via `org.owasp:dependency-check-gradle`. Run as a manual-stage
-  pre-commit hook (too slow for every commit). Worth running before
-  releases and periodically.
+- [x] **OWASP Dependency-Check** — `org.owasp.dependencycheck:12.2.2`
+  wired as `stages: [manual]` pre-commit hook. Run with
+  `pre-commit run --hook-stage manual owasp-dependency-check` or
+  `./gradlew dependencyCheckAnalyze` before releases. NVD API key
+  (env `NVD_API_KEY`) speeds up the CVE database download.
+  Suppressions: `config/owasp/suppressions.xml`.
 
-- [ ] **PMD** — structural static analysis complementary to SpotBugs.
-  Covers cyclomatic complexity, overly long methods, dead code, and
-  copy-paste detection — issue classes SpotBugs and fb-contrib largely
-  skip. Straightforward Gradle plugin integration. Recommended next
-  addition.
+- [x] **PMD** — `7.24.0` via Gradle built-in `pmd` plugin. Ruleset
+  `config/pmd/ruleset.xml` (errorprone + bestpractices categories).
+  Wired as a pre-commit hook (`./gradlew pmdMain`). Two findings
+  fixed: `AvoidDuplicateLiterals` (extracted `FILENAME_ARG` constant)
+  and `AvoidCatchingGenericException` (narrowed to
+  `JsonParseException | IllegalStateException`).
 
-- [ ] **Error Prone** — Google's compile-time bug checker; runs as a
-  javac plugin so findings appear during `compileJava`, not a separate
-  step. Highest signal-to-noise of any Java static analyzer; catches
-  real bugs SpotBugs misses because it has full type information at
-  compile time. Main risk: NeoGradle manages the compiler invocation
-  in non-standard ways, so the Java agent attachment required by Error
-  Prone may need extra Gradle wiring. Investigate integration before
-  committing. Consider NullAway (an Error Prone plugin) alongside it,
-  since we have started annotating with `@Nullable`.
+- [x] **Error Prone** — `net.ltgt.errorprone:5.1.0` with
+  `error_prone_core:2.49.0`. Gated behind `-Perrorprone` Gradle
+  property so normal builds are unaffected. Disabled on NeoGradle
+  internal tasks (`neoFormRecompile` etc.) via name filter in
+  `configureEach`. Wired as a pre-commit hook
+  (`./gradlew compileJava compileTestJava -Perrorprone`). Zero
+  findings on current code. NullAway can be added later if `@Nullable`
+  coverage grows.
 
 ---
 

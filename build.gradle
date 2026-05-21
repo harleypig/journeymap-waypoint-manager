@@ -3,6 +3,9 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.gradle.userdev' version '7.1.27'
     id 'com.github.spotbugs' version '6.5.4'
+    id 'pmd'
+    id 'org.owasp.dependencycheck' version '12.2.2'
+    id 'net.ltgt.errorprone' version '5.1.0'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -138,6 +141,8 @@ dependencies {
     // JourneyMap API on test classpath — NeoGradle doesn't propagate compileOnly to test compile
     testImplementation group: 'info.journeymap', name: 'journeymap-api-neoforge', version: journeymap_api_version, changing: true
 
+    errorprone 'com.google.errorprone:error_prone_core:2.49.0'
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
@@ -207,6 +212,17 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
+// Error Prone runs at compile time; gate behind -Perrorprone to avoid noise in
+// normal builds. Disabled on NeoGradle internal tasks to avoid classpath conflicts.
+tasks.withType(JavaCompile).configureEach {
+    if (name in ['compileJava', 'compileTestJava'] && project.hasProperty('errorprone')) {
+        options.errorprone.enabled = true
+        options.fork = true
+    } else {
+        options.errorprone.enabled = false
+    }
+}
+
 // Tests and quality checks run via pre-commit or explicit invocation, not the build lifecycle.
 // Evaluate at configuration time so captured booleans are cache-serializable.
 final boolean testsRequested = gradle.startParameter.taskNames.any { name ->
@@ -240,6 +256,39 @@ tasks.named('spotbugsMain') {
     reports {
         html { required = true }
         xml { required = false }
+    }
+}
+
+pmd {
+    toolVersion = '7.24.0'
+    ruleSets = []
+    ruleSetFiles = files('config/pmd/ruleset.xml')
+    consoleOutput = true
+    ignoreFailures = false
+}
+
+final boolean pmdRequested = gradle.startParameter.taskNames.any { it.startsWith('pmd') }
+tasks.withType(org.gradle.api.plugins.quality.Pmd).configureEach {
+    onlyIf { pmdRequested }
+}
+
+tasks.named('pmdMain') {
+    reports {
+        html { required = true }
+        xml { required = false }
+    }
+}
+
+// NVD API key speeds up downloads; set via NVD_API_KEY env var if available.
+dependencyCheck {
+    suppressionFile = 'config/owasp/suppressions.xml'
+    failBuildOnCVSS = 7.0
+}
+
+final boolean owaspRequested = gradle.startParameter.taskNames.any { it.startsWith('dependencyCheck') }
+tasks.configureEach {
+    if (name.startsWith('dependencyCheck')) {
+        onlyIf { owaspRequested }
     }
 }
 

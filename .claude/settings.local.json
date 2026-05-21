@@ -6,7 +6,10 @@
       "mcp__minecraft-modding__get-class-source",
       "Bash(./gradlew test *)",
       "Bash(gh search *)",
-      "Bash(pre-commit run *)"
+      "Bash(pre-commit run *)",
+      "mcp__gradle__lookup_maven_versions",
+      "Bash(./gradlew compileTestJava -Perrorprone)",
+      "Bash(./gradlew build *)"
     ]
   },
   "enabledMcpjsonServers": []

@@ -44,3 +44,24 @@ repos:
         entry: ./gradlew spotbugsMain -Plint
         pass_filenames: false
         types: [java]
+
+      - id: pmd
+        name: PMD
+        language: system
+        entry: ./gradlew pmdMain
+        pass_filenames: false
+        types: [java]
+
+      - id: errorprone
+        name: Error Prone
+        language: system
+        entry: ./gradlew compileJava compileTestJava -Perrorprone
+        pass_filenames: false
+        types: [java]
+
+      - id: owasp-dependency-check
+        name: OWASP Dependency-Check
+        language: system
+        entry: ./gradlew dependencyCheckAnalyze
+        pass_filenames: false
+        stages: [manual]
