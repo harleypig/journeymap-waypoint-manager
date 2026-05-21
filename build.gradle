@@ -200,7 +200,19 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.compilerArgs << '-Xlint:all' << '-Xlint:-processing'
+    // -Xlint only on our source tasks, and only when running quality checks.
+    // Normal builds stay quiet; pre-commit passes -Plint via the SpotBugs hook.
+    if (project.hasProperty('lint') && name in ['compileJava', 'compileTestJava']) {
+        options.compilerArgs << '-Xlint:all' << '-Xlint:-processing'
+    }
+}
+
+// Quality checks are run via pre-commit or explicit invocation, not the build lifecycle.
+// Evaluate at configuration time so the captured boolean is cache-serializable.
+// Run manually: ./gradlew spotbugsMain [-Plint]
+final boolean spotbugsRequested = gradle.startParameter.taskNames.any { it.contains('spotbugs') }
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    onlyIf { spotbugsRequested }
 }
 
 test {
@@ -230,3 +242,4 @@ idea {
         downloadJavadoc = true
     }
 }
+

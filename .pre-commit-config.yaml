@@ -27,6 +27,6 @@ repos:
       - id: spotbugs
         name: SpotBugs
         language: system
-        entry: ./gradlew spotbugsMain
+        entry: ./gradlew spotbugsMain -Plint
         pass_filenames: false
         types: [java]
