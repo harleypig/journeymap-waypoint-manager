@@ -21,3 +21,12 @@ repos:
     rev: v0.44.0
     hooks:
       - id: markdownlint
+
+  - repo: local
+    hooks:
+      - id: spotbugs
+        name: SpotBugs
+        language: system
+        entry: ./gradlew spotbugsMain
+        pass_filenames: false
+        types: [java]

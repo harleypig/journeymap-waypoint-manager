@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,6 +47,11 @@ public class WaypointCommand {
                                         ctx, StringArgumentType.getString(ctx, "filename"))))));
   }
 
+  @SuppressFBWarnings(
+      value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+      justification =
+          "file.getParent() is non-null: resolveFile always returns a path with at least"
+              + " three components (CONFIGDIR / MODID / filename.json)")
   private static int doExport(CommandContext<CommandSourceStack> ctx, String filename) {
     if (!JmWaypointManagerPlugin.isAvailable()) {
       ctx.getSource().sendFailure(Component.literal("JourneyMap is not loaded."));

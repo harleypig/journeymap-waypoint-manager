@@ -129,73 +129,116 @@ specific beta build — SNAPSHOT is intentional for this series.
 
 ---
 
-## Phase 4 — Implement MVP
+## Phase 4 — Implement MVP ✓ COMPLETE
 
-MVP scope: two commands that work in-game, one export format (JSON array).
+MVP scope: two commands that work in-game, one export format (JSON).
 
-- [ ] **`/wm export [filename]`**
-  - Calls JourneyMap API to get all waypoints for the current
-    world/server context.
-  - Writes a JSON array to `config/jm_waypoint_manager/<filename>.json`
-    (defaults to `waypoints.json`).
-  - Each entry includes: name, x, y, z, dimension, r, g, b, enabled,
-    group.
-  - Prints a confirmation message in chat with the file path and count.
+- [x] **`/wm export [filename]`** — implemented; writes
+  `config/jm_waypoint_manager/<filename>.json` (default `waypoints`).
+  JSON structure: `dimension → group → waypoint[]`. Includes guid for
+  round-trip duplicate detection.
 
-- [ ] **`/wm import <filename>`**
-  - Reads a JSON array from `config/jm_waypoint_manager/<filename>.json`.
-  - Creates each waypoint via the JourneyMap API.
-  - Skips duplicates (same name + coordinates) and reports how many
-    were added vs. skipped.
+- [x] **`/wm import <filename>`** — implemented; reads the same
+  format, skips duplicates by GUID (primary) and name+pos+dim
+  (fallback for user-owned waypoints).
 
-- [ ] Register the command using NeoForge's command registration event.
+- [x] Register the command using NeoForge's `RegisterCommandsEvent`
+  on the game bus from the client-only `@Mod` constructor.
 
-- [ ] Test with a known set of waypoints: export, delete all in-game,
-  import, verify they reappear.
+- [x] Test with a known set of waypoints — mod initializes in-game,
+  plugin discovered, API initialized. Full round-trip test (export →
+  delete → import) blocked pending file-structure design decisions;
+  see open questions below.
 
 ---
 
-## Phase 5 — Package and Install
+## Phase 5 — Package and Install ✓ PARTIALLY COMPLETE
 
-- [ ] `./gradlew build` produces a jar in `build/libs/`.
-- [ ] Copy the jar to the `mods/` folder of the target CurseForge
-  instance.
-- [ ] Confirm the mod loads in-game (check the mods list or log).
+- [x] `./gradlew build` produces a jar in `build/libs/`.
+- [x] Copy the jar to the `mods/` folder of the target CurseForge
+  instance (United Colonies).
+- [x] Confirm the mod loads in-game — mod appears in the in-game mod
+  list; JourneyMap discovers the plugin (`@JourneyMapPlugin` found,
+  API initialized).
+- [ ] Full round-trip test (export → delete waypoints → import →
+  verify) — blocked on open design questions below.
+
+---
+
+## Open Design Questions
+
+Answers needed before completing Phase 5 testing and implementing
+Phase 8 (config, logging, debug).
+
+**File structure** — where should the mod put its files?
+
+Proposed layout:
+
+```text
+<instance>/
+  jm_waypoint_manager/          ← mod working dir (FMLPaths.GAMEDIR)
+    waypoints/                  ← export/import files
+    logs/                       ← mod-specific log (if dedicated log added)
+  config/
+    jm_waypoint_manager.toml    ← NeoForge config (must live here)
+```
+
+Currently waypoints go to `config/jm_waypoint_manager/`. Decision
+needed: move to `<instance>/jm_waypoint_manager/waypoints/`?
+
+**Import vs export default filename** — commands already accept
+explicit filenames. Should the config default be one shared value
+(`waypoints`) or separate defaults for each command?
+Recommendation: one shared default.
+
+**Logging** — SLF4J already routes to `logs/latest.log`. Do we also
+want a dedicated `jm_waypoint_manager/logs/jm_waypoint_manager.log`
+(requires custom Log4j2 appender)?
+
+**Group management** — import/export already preserves group
+membership (round-trips the `dimension → group → waypoints[]`
+structure). Is the ask for management *commands* (`/wm group list`,
+`/wm group create`, etc.) or something else?
+
+---
+
+## Phase 8 — Config, Logging, and Debug (Planned)
+
+Blocked on open design questions above.
+
+- [ ] **Config** (`config/jm_waypoint_manager.toml`) — NeoForge
+  `ModConfigSpec`. Options: default filename, debug mode, log level.
+
+- [ ] **Debug flag in commands** — `/wm import <filename> debug`
+  (optional literal arg) overrides the config debug setting for that
+  one invocation; prints per-waypoint detail to chat.
+
+- [ ] **Dedicated log file** (if decided) — custom Log4j2 appender.
+
+- [ ] **File path migration** — move waypoint files to
+  `<instance>/jm_waypoint_manager/waypoints/` if that layout is
+  approved.
 
 ---
 
 ## Phase 6 — Code Quality Hooks
 
-Expand pre-commit coverage once the Gradle scaffold (Phase 1) is in
-place and Java sources exist to lint.
+- [x] **Spotless / google-java-format** — covered by the existing
+  `macisamuele/language-formatters-pre-commit-hooks` (`pretty-format-java`)
+  hook wired in Phase 1. No Gradle plugin needed.
 
-- [ ] **SpotBugs** — static bug analysis. Integrate via Gradle task
-  (`./gradlew spotbugsMain`) and wire as a pre-commit local hook.
-  Use `com.github.spotbugs` Gradle plugin. Treat all findings as
-  errors; suppress only with documented justification.
+- [ ] **SpotBugs** — static bug analysis via `com.github.spotbugs`
+  Gradle plugin (v6.5.4, SpotBugs tool 4.9.8). Wired as a local
+  pre-commit hook (`./gradlew spotbugsMain`). All findings treated as
+  errors; suppress only with documented `@SuppressFBWarnings`.
 
-- [ ] **Spotless** — opinionated formatter (wraps google-java-format).
-  Add `com.diffplug.spotless` Gradle plugin, configure
-  `googleJavaFormat()` in the `java` block. Wire two hooks:
-  - check: `./gradlew spotlessCheck` (in `.pre-commit-config.yaml`)
-  - fix: `./gradlew spotlessApply` (in `.pre-commit-config-fix.yaml`)
-  Use `macisamuele/language-formatters-pre-commit-hooks` as an
-  alternative if a non-Gradle hook is preferred (hook ID:
-  `pretty-format-java`, latest rev via
-  `gh api repos/macisamuele/language-formatters-pre-commit-hooks/tags`).
+- [ ] **Dependency security scan** — OWASP Dependency-Check Gradle
+  plugin (`org.owasp:dependency-check-gradle`). Run as a manual-stage
+  pre-commit hook (too slow for every commit).
 
-- [ ] **Dependency security scan** — check for known CVEs in
-  dependencies. Candidates:
-  - OWASP Dependency-Check Gradle plugin
-    (`org.owasp:dependency-check-gradle`) — comprehensive NVD scan.
-  - `./gradlew dependencyCheckAnalyze` as a manual-stage pre-commit
-    hook (slow; not appropriate for every commit).
-  Confirm the correct plugin and hook approach once the dependency
-  tree is established in Phase 2.
-
-- [ ] **Checkstyle / PMD** (optional) — evaluate after SpotBugs is
-  wired. Avoid adding both unless each catches distinct classes of
-  issue; overlapping linters add noise without value.
+- [ ] **Checkstyle / PMD** (optional) — evaluate after SpotBugs.
+  Only add if it catches distinct issue classes not covered by
+  SpotBugs.
 
 ---
 
