@@ -120,6 +120,14 @@ dependencies {
     // JourneyMap API — compile-time only; users install the full JM mod at runtime
     compileOnly group: 'info.journeymap', name: 'journeymap-api-neoforge', version: journeymap_api_version, changing: true
 
+    // Unit tests
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.mockito:mockito-core:5.23.0'
+
+    // JourneyMap API on test classpath — NeoGradle doesn't propagate compileOnly to test compile
+    testImplementation group: 'info.journeymap', name: 'journeymap-api-neoforge', version: journeymap_api_version, changing: true
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
@@ -183,6 +191,12 @@ publishing {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs << '-Xlint:all' << '-Xlint:-processing'
+}
+
+test {
+    useJUnitPlatform()
+    // Mockito 5.x inline mock maker uses byte-buddy dynamic agent attachment
+    jvmArgs '-XX:+EnableDynamicAgentLoading', '--add-opens=java.base/java.lang=ALL-UNNAMED'
 }
 
 // IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
