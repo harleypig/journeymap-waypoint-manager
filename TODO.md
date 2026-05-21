@@ -113,27 +113,18 @@ invocation — `./gradlew build` stays clean.
 
 ---
 
-## Phase 7 — GitHub Actions CI
+## Phase 7 — GitHub Actions CI ✓ COMPLETE
 
-Set up automated CI so every push and PR is verified without manual
-intervention.
+`.github/workflows/build.yml` — two parallel jobs on push/PR to
+`master`:
 
-- [ ] Create `.github/workflows/build.yml`:
-  - Trigger on `push` and `pull_request` to `main`/`master`.
-  - Steps: checkout → set up Java 21 → `./gradlew build`
-  - Cache Gradle wrapper and dependencies for faster runs.
-
-- [ ] Add a `pre-commit` CI job:
-  - Use `pre-commit/action` or invoke `pre-commit run --all-files`
-    directly.
-  - Run only the check config (`.pre-commit-config.yaml`), never
-    the fix config.
-
-- [ ] Add a SpotBugs/Spotless check job once Phase 6 is complete.
-
-- [ ] Consider a release workflow: on tag push matching `v*`, run
-  `./gradlew build` and upload the output jar as a GitHub release
-  asset via `gh release create`.
+- **Build** — `actions/checkout`, `actions/setup-java` (Temurin 21),
+  `gradle/actions/setup-gradle` (with caching), `./gradlew build`.
+- **Pre-commit checks** — same Java + Gradle setup, then
+  `actions/setup-python` + `pre-commit/action`. Runs
+  `.pre-commit-config.yaml` (check only): google-java-format,
+  SpotBugs, PMD, Error Prone, tests, wrapper validation. OWASP is
+  `stages: [manual]` so it is excluded from CI.
 
 ---
 
@@ -156,6 +147,21 @@ intervention.
 - [ ] **Group CRUD commands** — `/wm group list`, `/wm group create`,
   etc. Needed because importing someone else's waypoints will include
   their groups.
+
+---
+
+## Phase 9 — Release Automation (Planned)
+
+Deferred until the mod is ready to publish publicly.
+
+- [ ] **GitHub release workflow** — on tag push matching `v*`: run
+  `./gradlew build`, create a GitHub release via `gh release create`,
+  and attach the jar from `build/libs/`.
+
+- [ ] **CurseForge upload** — automate jar upload to CurseForge as
+  part of the release workflow. Research options: CurseForge API
+  directly, `cf-cli`, or the `itsmeow/curseforge-upload` action.
+  Will need a CurseForge API token stored as a repo secret.
 
 ---
 
