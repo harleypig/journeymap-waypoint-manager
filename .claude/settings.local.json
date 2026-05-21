@@ -5,7 +5,8 @@
       "mcp__minecraft-modding__search-class-source",
       "mcp__minecraft-modding__get-class-source",
       "Bash(./gradlew test *)",
-      "Bash(gh search *)"
+      "Bash(gh search *)",
+      "Bash(pre-commit run *)"
     ]
   },
   "enabledMcpjsonServers": []

@@ -186,19 +186,35 @@ Proposed layout:
 Currently waypoints go to `config/jm_waypoint_manager/`. Decision
 needed: move to `<instance>/jm_waypoint_manager/waypoints/`?
 
+Decision: Yes, follow the directory structure above. No path is required or
+needed for the filename, since it will be placed in the waypoints/ dir above.
+Including path (either slash) should be an error explaining why.
+
 **Import vs export default filename** — commands already accept
 explicit filenames. Should the config default be one shared value
 (`waypoints`) or separate defaults for each command?
 Recommendation: one shared default.
 
+Decision: default filenames for import and export should be the same and set
+in the configuration file automatically when initialized. If one or both of
+those settings are set to blank or removed, the relevant command should
+require a filename from the chat cli. In either case, the chat cli can
+override the configuration if a filename is included.
+
 **Logging** — SLF4J already routes to `logs/latest.log`. Do we also
 want a dedicated `jm_waypoint_manager/logs/jm_waypoint_manager.log`
 (requires custom Log4j2 appender)?
+
+Decision: Leave it for the moment, but keep it in mind should we ever need
+more details.
 
 **Group management** — import/export already preserves group
 membership (round-trips the `dimension → group → waypoints[]`
 structure). Is the ask for management *commands* (`/wm group list`,
 `/wm group create`, etc.) or something else?
+
+Answer: We want group CRUD as well, since importing someone else's waypoints
+will almost certainly include their own groups.
 
 ---
 
