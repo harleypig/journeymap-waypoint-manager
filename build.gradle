@@ -207,8 +207,15 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
-// Quality checks are run via pre-commit or explicit invocation, not the build lifecycle.
-// Evaluate at configuration time so the captured boolean is cache-serializable.
+// Tests and quality checks run via pre-commit or explicit invocation, not the build lifecycle.
+// Evaluate at configuration time so captured booleans are cache-serializable.
+final boolean testsRequested = gradle.startParameter.taskNames.any { name ->
+    name == 'test' || name == ':test' || name == 'testJunit' || name == ':testJunit'
+}
+tasks.withType(Test).configureEach {
+    onlyIf { testsRequested }
+}
+
 // Run manually: ./gradlew spotbugsMain [-Plint]
 final boolean spotbugsRequested = gradle.startParameter.taskNames.any { it.contains('spotbugs') }
 tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {

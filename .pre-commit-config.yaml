@@ -24,6 +24,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: test
+        name: Unit tests
+        language: system
+        entry: ./gradlew test
+        pass_filenames: false
+        types: [java]
+
       - id: spotbugs
         name: SpotBugs
         language: system
