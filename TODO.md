@@ -224,21 +224,37 @@ Blocked on open design questions above.
 ## Phase 6 — Code Quality Hooks
 
 - [x] **Spotless / google-java-format** — covered by the existing
-  `macisamuele/language-formatters-pre-commit-hooks` (`pretty-format-java`)
-  hook wired in Phase 1. No Gradle plugin needed.
+  `macisamuele/language-formatters-pre-commit-hooks`
+  (`pretty-format-java`) hook wired in Phase 1. No Gradle plugin
+  needed.
 
-- [ ] **SpotBugs** — static bug analysis via `com.github.spotbugs`
+- [x] **SpotBugs** — static bug analysis via `com.github.spotbugs`
   Gradle plugin (v6.5.4, SpotBugs tool 4.9.8). Wired as a local
   pre-commit hook (`./gradlew spotbugsMain`). All findings treated as
-  errors; suppress only with documented `@SuppressFBWarnings`.
+  errors; suppress only with documented `@SuppressFBWarnings`. Plugins
+  active: find-sec-bugs (security patterns) and fb-contrib/sb-contrib
+  (extended correctness/performance patterns).
 
-- [ ] **Dependency security scan** — OWASP Dependency-Check Gradle
-  plugin (`org.owasp:dependency-check-gradle`). Run as a manual-stage
-  pre-commit hook (too slow for every commit).
+- [ ] **OWASP Dependency-Check** — scans dependencies for known CVEs
+  via `org.owasp:dependency-check-gradle`. Run as a manual-stage
+  pre-commit hook (too slow for every commit). Worth running before
+  releases and periodically.
 
-- [ ] **Checkstyle / PMD** (optional) — evaluate after SpotBugs.
-  Only add if it catches distinct issue classes not covered by
-  SpotBugs.
+- [ ] **PMD** — structural static analysis complementary to SpotBugs.
+  Covers cyclomatic complexity, overly long methods, dead code, and
+  copy-paste detection — issue classes SpotBugs and fb-contrib largely
+  skip. Straightforward Gradle plugin integration. Recommended next
+  addition.
+
+- [ ] **Error Prone** — Google's compile-time bug checker; runs as a
+  javac plugin so findings appear during `compileJava`, not a separate
+  step. Highest signal-to-noise of any Java static analyzer; catches
+  real bugs SpotBugs misses because it has full type information at
+  compile time. Main risk: NeoGradle manages the compiler invocation
+  in non-standard ways, so the Java agent attachment required by Error
+  Prone may need extra Gradle wiring. Investigate integration before
+  committing. Consider NullAway (an Error Prone plugin) alongside it,
+  since we have started annotating with `@Nullable`.
 
 ---
 
