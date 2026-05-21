@@ -222,6 +222,7 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
     onlyIf { spotbugsRequested }
 }
 
+
 test {
     useJUnitPlatform()
     // Mockito 5.x inline mock maker uses byte-buddy dynamic agent attachment

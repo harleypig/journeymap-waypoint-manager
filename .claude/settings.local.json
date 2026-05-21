@@ -4,7 +4,8 @@
       "mcp__minecraft-modding__resolve-artifact",
       "mcp__minecraft-modding__search-class-source",
       "mcp__minecraft-modding__get-class-source",
-      "Bash(./gradlew test *)"
+      "Bash(./gradlew test *)",
+      "Bash(gh search *)"
     ]
   },
   "enabledMcpjsonServers": [

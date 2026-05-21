@@ -24,6 +24,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: validate-gradle-wrapper
+        name: Validate Gradle wrapper
+        language: system
+        entry: bash scripts/validate-gradle-wrapper.sh
+        files: '^gradle/wrapper/'
+        pass_filenames: false
+
       - id: test
         name: Unit tests
         language: system
