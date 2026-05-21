@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__minecraft-modding__resolve-artifact",
+      "mcp__minecraft-modding__search-class-source",
+      "mcp__minecraft-modding__get-class-source",
+      "Bash(./gradlew test *)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "gradle"
+  ]
+}
