@@ -24,42 +24,23 @@ editor options, Gradle, and the build/test workflow for headless WSL2).
 
 ---
 
-## Phase 1 — Scaffold the Project
+## Phase 1 — Scaffold the Project ✓ COMPLETE
 
-- [ ] **Clone the NeoForge MDK** as a sibling repo:
+- [x] **Clone the NeoForge MDK** — used `NeoForgeMDKs/MDK-1.21.1-NeoGradle`
+  cloned to `../MDK-1.21.1-NeoGradle`.
 
-  ```bash
-  git clone https://github.com/neoforged/MDK ../MDK
-  ```
+- [x] **Copy scaffold files** from the MDK into this repo verbatim,
+  then applied google-java-format as a separate formatting commit.
 
-  Then check out the correct branch/tag for 1.21.1 — inspect
-  `git -C ../MDK branch -a` and `git -C ../MDK tag` to find it.
-
-- [ ] **Copy scaffold files** from `../MDK` into this repo. Files to copy:
-  - `build.gradle`, `settings.gradle`, `gradle.properties`
-  - `gradle/` directory, `gradlew`, `gradlew.bat`
-  - `src/main/java/com/example/examplemod/` (rename to our package below)
-  - `src/main/resources/META-INF/mods.toml`
-  - `src/main/resources/pack.mcmeta`
-  - `.gitignore` (MDK's Gradle/IntelliJ ignore rules are comprehensive)
-  Do NOT copy `.git/`, `README.md`, or `LICENSE` from the MDK.
-
-- [ ] **Rename the example mod** to match this project:
-  - Mod ID: `jm_waypoint_manager` (snake_case, no hyphens)
-  - Mod name: `JM Waypoint Manager`
+- [x] **Rename the example mod** to match this project:
+  - Mod ID: `jm_waypoint_manager`
+  - Mod name: `JourneyMap Waypoint Manager` (display name)
   - Package: `com.harleypig.jm_waypoint_manager`
-  - Files to update: `build.gradle`, `settings.gradle`,
-    `gradle.properties`, `src/main/resources/META-INF/mods.toml`,
-    the main Java class, and all package directories.
+  - Added `neo_version_range=[21.1.0,21.2.0)` so the jar loads on any
+    NeoForge 21.1.x, not just the exact build it was compiled against.
 
-- [ ] **Run the initial Gradle setup** to verify the scaffold compiles:
-
-  ```bash
-  ./gradlew build
-  ```
-
-  This will download NeoForge and all dependencies on first run (~5–15
-  minutes). A `BUILD SUCCESSFUL` confirms the scaffold is working.
+- [x] **Run the initial Gradle setup** — `BUILD SUCCESSFUL`,
+  produces `build/libs/jm_waypoint_manager-0.1.0.jar`.
 
 ---
 
