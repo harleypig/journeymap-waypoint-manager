@@ -124,6 +124,9 @@ dependencies {
     // SpotBugs annotations for @SuppressFBWarnings (CLASS retention; not needed at runtime)
     compileOnly 'com.github.spotbugs:spotbugs-annotations:4.9.8'
 
+    // find-sec-bugs: security bug patterns for SpotBugs
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
+
     // Unit tests
     testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

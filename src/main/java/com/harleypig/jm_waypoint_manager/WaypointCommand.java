@@ -48,10 +48,10 @@ public class WaypointCommand {
   }
 
   @SuppressFBWarnings(
-      value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+      value = {"NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", "CRLF_INJECTION_LOGS"},
       justification =
-          "file.getParent() is non-null: resolveFile always returns a path with at least"
-              + " three components (CONFIGDIR / MODID / filename.json)")
+          "getParent() is non-null: resolveFile returns a 3-component path;"
+              + " CRLF stripped from filename in resolveFile() before path construction")
   private static int doExport(CommandContext<CommandSourceStack> ctx, String filename) {
     if (!JmWaypointManagerPlugin.isAvailable()) {
       ctx.getSource().sendFailure(Component.literal("JourneyMap is not loaded."));
@@ -85,6 +85,9 @@ public class WaypointCommand {
     return count;
   }
 
+  @SuppressFBWarnings(
+      value = "CRLF_INJECTION_LOGS",
+      justification = "CRLF stripped from filename in resolveFile() before path construction")
   private static int doImport(CommandContext<CommandSourceStack> ctx, String filename) {
     if (!JmWaypointManagerPlugin.isAvailable()) {
       ctx.getSource().sendFailure(Component.literal("JourneyMap is not loaded."));
@@ -131,9 +134,10 @@ public class WaypointCommand {
     return added;
   }
 
-  // Strips path separators to prevent directory traversal, appends .json.
+  // Strips path separators and CRLF characters to prevent directory traversal
+  // and log injection, then appends .json.
   private static Path resolveFile(String filename) {
-    String safe = filename.replaceAll("[/\\\\]", "_");
+    String safe = filename.replaceAll("[/\\\\\r\n]", "_");
     if (safe.endsWith(".json")) {
       safe = safe.substring(0, safe.length() - 5);
     }
