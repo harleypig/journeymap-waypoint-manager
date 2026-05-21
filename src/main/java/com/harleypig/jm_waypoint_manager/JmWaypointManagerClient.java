@@ -9,6 +9,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.NeoForge;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = JmWaypointManager.MODID, dist = Dist.CLIENT)
@@ -17,11 +18,11 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 @EventBusSubscriber(modid = JmWaypointManager.MODID, value = Dist.CLIENT)
 public class JmWaypointManagerClient {
   public JmWaypointManagerClient(ModContainer container) {
-    // Allows NeoForge to create a config screen for this mod's configs.
-    // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking
-    // on config.
-    // Do not forget to add translations for your config options to the en_us.json file.
     container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+
+    // RegisterCommandsEvent fires on the game bus (integrated server in SP).
+    // Safe to call Minecraft.getInstance() from handlers since this mod is client-only.
+    NeoForge.EVENT_BUS.addListener(WaypointCommand::onRegisterCommands);
   }
 
   @SubscribeEvent
