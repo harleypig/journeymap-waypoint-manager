@@ -44,30 +44,26 @@ editor options, Gradle, and the build/test workflow for headless WSL2).
 
 ---
 
-## Phase 2 — Add the JourneyMap API Dependency
+## Phase 2 — Add the JourneyMap API Dependency ✓ COMPLETE
 
-- [ ] **Find the correct JourneyMap API artifact** for JM 6.0.0-beta /
-  NeoForge 1.21.1.
-  - Check the JourneyMap API GitHub releases:
-    <https://github.com/TeamJM/journeymap-api>
-  - Check the JourneyMap CurseForge or Modrinth page for the API jar.
-  - The API jar is separate from the main mod jar. You depend on the
-    API at compile time but the user installs the full mod at runtime.
+- [x] **Find the correct JourneyMap API artifact**: `journeymap-api-neoforge`
+  version `2.0.0-1.21.1-SNAPSHOT` from `https://maven.blamejared.com`.
+  Source: `TeamJM/journeymap-api` branch `1.21.1_2.0_SNAPSHOTS`,
+  `docs/howto.md`.
 
-- [ ] **Add the API to `build.gradle`** under `dependencies`:
+- [x] **Added to `gradle.properties`**: `journeymap_api_version=2.0.0-1.21.1-SNAPSHOT`
 
-  ```groovy
-  compileOnly "info.journeymap:journeymap-api-neoforge:<version>"
-  ```
+- [x] **Added to `build.gradle`**:
+  - Two JourneyMap Maven repos (primary: `maven.blamejared.com`,
+    legacy: `jm.gserv.me`)
+  - `configurations.all { resolutionStrategy.cacheChangingModulesFor 0, 'seconds' }`
+    so SNAPSHOT updates are fetched on every build
+  - `compileOnly group: 'info.journeymap', name: 'journeymap-api-neoforge', version: journeymap_api_version, changing: true`
 
-  The exact group ID, artifact ID, and version need to be confirmed
-  from the step above — do not guess.
+- [x] **Added soft JourneyMap dependency** to `neoforge.mods.toml` so the
+  mod loads after JourneyMap when both are present but does not require it.
 
-- [ ] Add the JourneyMap repository to `repositories` in `build.gradle`
-  if the API is not on Maven Central (it likely isn't). The JourneyMap
-  team publishes to their own Maven; find the URL in their repo README.
-
-- [ ] Run `./gradlew build` again to confirm the API resolves.
+- [x] `./gradlew compileJava` — BUILD SUCCESSFUL, API on classpath.
 
 ---
 

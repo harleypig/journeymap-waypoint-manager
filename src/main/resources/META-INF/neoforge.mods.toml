@@ -89,6 +89,14 @@ Supports JSON files compatible with external tools and scripts.
     ordering="NONE"
     side="BOTH"
 
+# JourneyMap soft dependency — mod works without JM but activates the plugin when present
+[[dependencies.${mod_id}]]
+    modId="journeymap"
+    type="optional"
+    versionRange="[1.21-6.0.0-beta.1,)"
+    ordering="AFTER"
+    side="CLIENT"
+
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.
