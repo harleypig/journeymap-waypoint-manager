@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,9 +24,10 @@ public class WaypointSerializer {
 
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-  public static JsonObject toJson(List<? extends Waypoint> waypoints, IClientAPI api) {
-    Map<String, String> guidToName = new HashMap<>();
-    for (WaypointGroup group : api.getAllWaypointGroups()) {
+  public static JsonObject toJson(Iterable<? extends Waypoint> waypoints, IClientAPI api) {
+    List<? extends WaypointGroup> allGroups = api.getAllWaypointGroups();
+    Map<String, String> guidToName = new HashMap<>(allGroups.size() * 2);
+    for (WaypointGroup group : allGroups) {
       guidToName.put(group.getGuid(), group.getName());
     }
 
@@ -91,15 +93,17 @@ public class WaypointSerializer {
   // Returns int[]{added, skipped}.
   public static int[] fromJson(JsonObject root, IClientAPI api, String modId) {
     // GUID set for waypoints we own — primary duplicate check for round-trips.
-    Set<String> ownedGuids = new HashSet<>();
-    for (Waypoint wp : api.getWaypoints(modId)) {
+    List<? extends Waypoint> ownedList = api.getWaypoints(modId);
+    Set<String> ownedGuids = new HashSet<>(ownedList.size() * 2);
+    for (Waypoint wp : ownedList) {
       ownedGuids.add(wp.getGuid());
     }
 
     // Name+pos+dim set across all waypoints — fallback for user-created
     // waypoints (owned by "journeymap", not our modId).
-    Set<String> allByPosition = new HashSet<>();
-    for (Waypoint wp : api.getAllWaypoints()) {
+    List<? extends Waypoint> allList = api.getAllWaypoints();
+    Set<String> allByPosition = new HashSet<>(allList.size() * 2);
+    for (Waypoint wp : allList) {
       allByPosition.add(
           dupKey(wp.getName(), wp.getX(), wp.getY(), wp.getZ(), wp.getPrimaryDimension()));
     }
@@ -178,6 +182,7 @@ public class WaypointSerializer {
 
   // Finds an existing group by name under modId, or creates and registers a new one.
   // Returns null for the unnamed default group (empty string key).
+  @Nullable
   private static WaypointGroup resolveGroup(IClientAPI api, String modId, String name) {
     if (name.isEmpty()) {
       return null;

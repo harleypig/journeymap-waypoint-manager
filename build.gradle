@@ -127,6 +127,9 @@ dependencies {
     // find-sec-bugs: security bug patterns for SpotBugs
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
 
+    // fb-contrib: extended bug patterns for performance/correctness
+    spotbugsPlugins 'com.mebigfatguy.sb-contrib:sb-contrib:7.7.4'
+
     // Unit tests
     testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

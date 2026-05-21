@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.List;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.common.waypoint.Waypoint;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -22,25 +21,25 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 public class WaypointCommand {
 
   public static void onRegisterCommands(RegisterCommandsEvent event) {
-    register(event.getDispatcher(), event.getBuildContext());
+    register(event.getDispatcher());
   }
 
-  public static void register(
-      CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
+  private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    StringArgumentType filenameArg = StringArgumentType.string();
     dispatcher.register(
         Commands.literal("wm")
             .then(
                 Commands.literal("export")
                     .executes(ctx -> doExport(ctx, "waypoints"))
                     .then(
-                        Commands.argument("filename", StringArgumentType.string())
+                        Commands.argument("filename", filenameArg)
                             .executes(
                                 ctx ->
                                     doExport(ctx, StringArgumentType.getString(ctx, "filename")))))
             .then(
                 Commands.literal("import")
                     .then(
-                        Commands.argument("filename", StringArgumentType.string())
+                        Commands.argument("filename", filenameArg)
                             .executes(
                                 ctx ->
                                     doImport(
@@ -86,8 +85,10 @@ public class WaypointCommand {
   }
 
   @SuppressFBWarnings(
-      value = "CRLF_INJECTION_LOGS",
-      justification = "CRLF stripped from filename in resolveFile() before path construction")
+      value = {"CRLF_INJECTION_LOGS", "CLI_CONSTANT_LIST_INDEX"},
+      justification =
+          "CRLF stripped from filename in resolveFile() before path construction;"
+              + " result[0]/result[1] are immediately aliased to named variables")
   private static int doImport(CommandContext<CommandSourceStack> ctx, String filename) {
     if (!JmWaypointManagerPlugin.isAvailable()) {
       ctx.getSource().sendFailure(Component.literal("JourneyMap is not loaded."));
