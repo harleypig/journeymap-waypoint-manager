@@ -130,29 +130,58 @@ invocation — `./gradlew build` stays clean.
 
 ## Phase 8 — Config, Logging, and Debug
 
-- [ ] **File path migration** — move waypoint files from
+- [x] **File path migration** — waypoint files moved from
   `config/jm_waypoint_manager/` to `<instance>/jm_waypoint_manager/`.
-  Filenames only (no path separators); a slash in the input is an
-  error.
+  Slash in filename is an error; `.json` auto-appended.
 
-- [ ] **Config** (`config/jm_waypoint_manager.toml`) — NeoForge
-  `ModConfigSpec`. Default import/export filename (shared, set at
-  init; blank means the command requires an explicit filename). Debug
-  mode and log level options.
+- [x] **Config** (`config/jm_waypoint_manager-client.toml`) — NeoForge
+  `ModConfigSpec` registered in `JmWaypointManagerClient`. Options:
+  `defaultFilename` (blank = explicit filename required) and
+  `debugMode` (writes per-waypoint detail to log).
 
-- [ ] **Debug flag in commands** — `/wm import <filename> debug`
-  (optional literal arg) overrides the config debug setting for that
-  one invocation; prints per-waypoint detail to chat.
+- [x] **Debug flag in commands** — `debug` keyword accepted before or
+  after the optional filename in both `export` and `import`. Writes
+  per-waypoint detail to `latest.log`; chat reply says "(detail in
+  log)".
 
 - [ ] **Group CRUD commands** — `/wm group list`, `/wm group create`,
   etc. Needed because importing someone else's waypoints will include
-  their groups.
+  their groups. Deferred to Phase 10.
+
+- [ ] **Duplicate detection design** — GUID match and coordinate match
+  cover the common cases, but names are unreliable ("Village" appears
+  in every world). Design a strategy for cross-source imports where
+  neither GUID nor exact coordinates are a reliable signal.
 
 ---
 
-## Phase 9 — Release Automation (Planned)
+## Phase 9 — Live Waypoint Sync (Planned)
 
-Deferred until the mod is ready to publish publicly.
+JourneyMap API v2 exposes `CommonEventRegistry.WAYPOINT_EVENT` with
+CREATE/UPDATE/DELETED contexts — auto-export on waypoint change is
+feasible. Needs design work before implementation.
+
+- [ ] **Auto-export on change** — subscribe to `WaypointEvent` and
+  re-export to the default file whenever a waypoint is added, updated,
+  or deleted. Requires `defaultFilename` to be set.
+
+- [ ] **Incremental update** — instead of full overwrite on each
+  change, track deltas and merge into the existing file. Requires a
+  merge strategy for removed waypoints.
+
+---
+
+## Phase 10 — Group CRUD (Planned)
+
+- [ ] **Group CRUD commands** — `/wm group list`, `/wm group create
+  <name>`, `/wm group delete <name>`. Needed because importing someone
+  else's waypoints will include their groups.
+
+---
+
+## Phase 11 — Release Automation (Planned)
+
+Deferred until the mod is feature-complete and ready to publish.
 
 - [ ] **GitHub release workflow** — on tag push matching `v*`: run
   `./gradlew build`, create a GitHub release via `gh release create`,
@@ -162,6 +191,21 @@ Deferred until the mod is ready to publish publicly.
   part of the release workflow. Research options: CurseForge API
   directly, `cf-cli`, or the `itsmeow/curseforge-upload` action.
   Will need a CurseForge API token stored as a repo secret.
+
+- [ ] **Issue templates** — create `.github/ISSUE_TEMPLATE/` templates
+  for feature requests and bug reports.
+
+---
+
+## Phase 12 — Companion Tooling (Planned)
+
+- [ ] **JSON schema** — define a JSON schema for the waypoints.json
+  format to enable editor autocomplete and validation of hand-crafted
+  import files.
+
+- [ ] **Format conversion script** — Python script to convert waypoint
+  data from other formats (JourneyMap `.csv`, other mod exports) into
+  this mod's JSON format.
 
 ---
 
@@ -173,3 +217,7 @@ Deferred until the mod is ready to publish publicly.
   plain JSON without any mod tooling.
 - The `WaypointData.dat` NBT files should never be parsed directly by
   this mod; use the API exclusively.
+- [ ] **NeoForge GameTest** — research the GameTest framework
+  (`./gradlew runGameTestServer`) for in-game integration tests.
+  Useful for verifying command registration and end-to-end API
+  behavior; would complement the current JUnit 5 unit tests.

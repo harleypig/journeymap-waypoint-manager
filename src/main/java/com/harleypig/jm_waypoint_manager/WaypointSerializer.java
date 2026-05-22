@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
@@ -24,6 +25,7 @@ public class WaypointSerializer {
 
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+  /** Serializes waypoints into a JSON object grouped by primary dimension then group name. */
   public static JsonObject toJson(Iterable<? extends Waypoint> waypoints, IClientAPI api) {
     List<? extends WaypointGroup> allGroups = api.getAllWaypointGroups();
     Map<String, String> guidToName = new HashMap<>(allGroups.size() * 2);
@@ -82,16 +84,19 @@ public class WaypointSerializer {
     return obj;
   }
 
+  /** Formats a JSON object as a pretty-printed string. */
   public static String toJsonString(JsonObject json) {
     return GSON.toJson(json);
   }
 
+  /** Parses a JSON string into a root object for use with {@link #fromJson}. */
   public static JsonObject fromJsonString(String json) {
     return JsonParser.parseString(json).getAsJsonObject();
   }
 
-  // Returns int[]{added, skipped}.
-  public static int[] fromJson(JsonObject root, IClientAPI api, String modId) {
+  /** Imports waypoints from a parsed JSON root; returns {@code int[]{added, skipped}}. */
+  public static int[] fromJson(
+      JsonObject root, IClientAPI api, String modId, Consumer<String> debugLog) {
     // GUID set for waypoints we own — primary duplicate check for round-trips.
     List<? extends Waypoint> ownedList = api.getWaypoints(modId);
     Set<String> ownedGuids = new HashSet<>(ownedList.size() * 2);
@@ -129,6 +134,8 @@ public class WaypointSerializer {
           // GUID check first (exact round-trip match for our waypoints).
           String guid = obj.has("guid") ? obj.get("guid").getAsString() : null;
           if (guid != null && ownedGuids.contains(guid)) {
+            debugLog.accept(
+                "  skip (guid) " + name + " (" + x + ", " + y + ", " + z + ") in " + primaryDim);
             skipped++;
             continue;
           }
@@ -136,6 +143,8 @@ public class WaypointSerializer {
           // Positional check catches user waypoints and import-from-JM exports.
           String posKey = dupKey(name, x, y, z, primaryDim);
           if (allByPosition.contains(posKey)) {
+            debugLog.accept(
+                "  skip (pos)  " + name + " (" + x + ", " + y + ", " + z + ") in " + primaryDim);
             skipped++;
             continue;
           }
@@ -172,6 +181,8 @@ public class WaypointSerializer {
           api.addWaypoint(modId, wp);
           ownedGuids.add(wp.getGuid());
           allByPosition.add(posKey);
+          debugLog.accept(
+              "  add         " + name + " (" + x + ", " + y + ", " + z + ") in " + primaryDim);
           added++;
         }
       }

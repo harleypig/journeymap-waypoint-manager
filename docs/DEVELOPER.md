@@ -1,4 +1,53 @@
-# Developer Setup — Headless WSL2 Ubuntu 24.04
+# Developer Guide
+
+## Architecture
+
+The mod is structured around the NeoForge `@Mod` / `@Mod(dist=CLIENT)`
+split so that no client-only code runs on a dedicated server.
+
+### Key Classes
+
+| Class | Role |
+|-------|------|
+| `JmWaypointManager` | Main mod class; declares `MODID` and the shared logger |
+| `JmWaypointManagerClient` | Client-only class; registers config and wires the `/wm` command event |
+| `JmWaypointManagerPlugin` | JourneyMap plugin (`@JourneyMapPlugin`); stores the live `IClientAPI` reference |
+| `WaypointCommand` | Brigadier command tree for `/wm export` and `/wm import`; thin NeoForge wrapper over `WaypointSerializer` |
+| `WaypointSerializer` | Pure business logic — `toJson`, `fromJson`, and duplicate detection; no NeoForge dependencies |
+| `WaypointManagerConfig` | NeoForge `ModConfigSpec` for `defaultFilename` and `debugMode` |
+
+### Data Flow — Export
+
+```text
+/wm export  →  WaypointCommand.doExport
+               ├─ JmWaypointManagerPlugin.getApi().getAllWaypoints()
+               ├─ WaypointSerializer.toJson(waypoints, api)
+               └─ Files.writeString(resolveFile(filename), json)
+```
+
+### Data Flow — Import
+
+```text
+/wm import  →  WaypointCommand.doImport
+               ├─ Files.readString(resolveFile(filename))
+               ├─ WaypointSerializer.fromJsonString(content)
+               └─ WaypointSerializer.fromJson(root, api, modId, debugLog)
+                  ├─ duplicate check (GUID + position)
+                  ├─ WaypointFactory.createWaypoint(...)
+                  └─ api.addWaypoint(modId, waypoint)
+```
+
+### File Locations (Runtime)
+
+- Waypoint JSON files: `<instance>/jm_waypoint_manager/<name>.json`
+- Mod config: `<instance>/config/jm_waypoint_manager-client.toml`
+
+See `.claude/CONVENTIONS.md` for naming conventions, testing
+constraints, and the pre-commit workflow.
+
+---
+
+## Developer Setup — Headless WSL2 Ubuntu 24.04
 
 This project is developed in a headless Linux environment (WSL2 Ubuntu 24.04).
 Minecraft runs on the Windows host; the mod is built in Linux and the output
