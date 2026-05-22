@@ -144,18 +144,26 @@ invocation — `./gradlew build` stays clean.
   per-waypoint detail to `latest.log`; chat reply says "(detail in
   log)".
 
-- [ ] **Group CRUD commands** — `/wm group list`, `/wm group create`,
-  etc. Needed because importing someone else's waypoints will include
-  their groups. Deferred to Phase 10.
+---
+
+## Phase 9 — Group CRUD (Planned)
+
+- [ ] **Group CRUD commands** — `/wm group list`, `/wm group create
+  <name>`, `/wm group delete <name>`. Needed because importing someone
+  else's waypoints may include groups that don't exist locally.
 
 - [ ] **Duplicate detection design** — GUID match and coordinate match
   cover the common cases, but names are unreliable ("Village" appears
   in every world). Design a strategy for cross-source imports where
-  neither GUID nor exact coordinates are a reliable signal.
+  neither GUID nor exact coordinates are a reliable signal. Must be
+  resolved before Phase 10.
 
 ---
 
-## Phase 9 — Live Waypoint Sync (Planned)
+## Phase 10 — Live Waypoint Sync (Planned)
+
+Duplicate detection strategy (Phase 9) must be decided before starting
+this phase.
 
 JourneyMap API v2 exposes `CommonEventRegistry.WAYPOINT_EVENT` with
 CREATE/UPDATE/DELETED contexts — auto-export on waypoint change is
@@ -168,14 +176,6 @@ feasible. Needs design work before implementation.
 - [ ] **Incremental update** — instead of full overwrite on each
   change, track deltas and merge into the existing file. Requires a
   merge strategy for removed waypoints.
-
----
-
-## Phase 10 — Group CRUD (Planned)
-
-- [ ] **Group CRUD commands** — `/wm group list`, `/wm group create
-  <name>`, `/wm group delete <name>`. Needed because importing someone
-  else's waypoints will include their groups.
 
 ---
 
