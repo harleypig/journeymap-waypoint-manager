@@ -5,8 +5,33 @@ on:
     branches: [master]
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Check for build-relevant changes
+        id: check
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          if echo "$changed" | grep -qE \
+            '^(src/|config/|gradle/|.*\.gradle$|gradle\.properties$|\.pre-commit-config.*\.yaml$|\.github/workflows/)'; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
     name: Build
+    needs: [changes, pre-commit]
+    if: needs.changes.outputs.build == 'true' && needs.pre-commit.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
@@ -39,3 +64,15 @@ jobs:
           python-version: '3.x'
 
       - uses: pre-commit/action@v3.0.1
+
+  ci:
+    name: CI
+    needs: [changes, build, pre-commit]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: All checks passed or skipped
+        run: |
+          [[ "${{ needs.changes.result }}" == "success" ]] || exit 1
+          [[ "${{ needs.build.result }}" =~ ^(success|skipped)$ ]] || exit 1
+          [[ "${{ needs.pre-commit.result }}" == "success" ]] || exit 1
