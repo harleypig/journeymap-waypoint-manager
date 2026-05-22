@@ -34,6 +34,16 @@
 - CRLF characters are stripped in `resolveFile()` to prevent log
   injection.
 
+## JSON Format
+
+- The mod reads and writes only its own JSON format. Never parse
+  JourneyMap's internal `WaypointData.dat` (NBT binary); use the API
+  exclusively.
+- Structure: `dimension → group → waypoint[]`. Group key `""` means
+  the ungrouped default group.
+- External tools can generate import files as plain JSON without any
+  mod tooling.
+
 ## Testing Constraints
 
 - `FMLPaths`, `ModLoadingContext`, and NeoForge event bus cannot be
@@ -45,3 +55,21 @@
 - Business logic (serialization, filename validation, resolution) must
   be extractable from NeoForge-dependent code so it can be unit-tested.
   Extract to package-private helpers when needed.
+- NeoForge has a `GameTest` framework (`./gradlew runGameTestServer`)
+  for in-game integration tests, but it requires a running game
+  instance and is not appropriate for testing business logic. JUnit 5
+  + Mockito is the right fit for this mod.
+
+## Pre-commit Workflow
+
+- **Fix config** (`.pre-commit-config-fix.yaml`) — applies all
+  auto-fixes: Google Java Format, trailing whitespace, end-of-file
+  newlines, and mixed line endings.
+- **Check config** (`.pre-commit-config.yaml`) — read-only checks:
+  static analysis, tests, markdown, and formatting verification.
+- **Workflow before committing locally:**
+  1. `pre-commit run --config .pre-commit-config-fix.yaml --all-files`
+  2. Re-stage modified files and commit (check config runs via hook).
+- **CI enforcement:** runs the fix config, then `git diff --exit-code`
+  to fail if any files needed auto-fixing, then runs the check config
+  for static analysis, tests, and the remaining hooks.

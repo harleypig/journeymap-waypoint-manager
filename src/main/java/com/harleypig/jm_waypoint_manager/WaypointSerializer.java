@@ -25,6 +25,7 @@ public class WaypointSerializer {
 
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+  /** Serializes waypoints into a JSON object grouped by primary dimension then group name. */
   public static JsonObject toJson(Iterable<? extends Waypoint> waypoints, IClientAPI api) {
     List<? extends WaypointGroup> allGroups = api.getAllWaypointGroups();
     Map<String, String> guidToName = new HashMap<>(allGroups.size() * 2);
@@ -83,15 +84,17 @@ public class WaypointSerializer {
     return obj;
   }
 
+  /** Formats a JSON object as a pretty-printed string. */
   public static String toJsonString(JsonObject json) {
     return GSON.toJson(json);
   }
 
+  /** Parses a JSON string into a root object for use with {@link #fromJson}. */
   public static JsonObject fromJsonString(String json) {
     return JsonParser.parseString(json).getAsJsonObject();
   }
 
-  // Returns int[]{added, skipped}. debugLog receives one line per waypoint decision.
+  /** Imports waypoints from a parsed JSON root; returns {@code int[]{added, skipped}}. */
   public static int[] fromJson(
       JsonObject root, IClientAPI api, String modId, Consumer<String> debugLog) {
     // GUID set for waypoints we own — primary duplicate check for round-trips.

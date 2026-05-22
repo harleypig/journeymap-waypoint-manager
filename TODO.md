@@ -148,6 +148,11 @@ invocation — `./gradlew build` stays clean.
   etc. Needed because importing someone else's waypoints will include
   their groups. Deferred to Phase 10.
 
+- [ ] **Duplicate detection design** — GUID match and coordinate match
+  cover the common cases, but names are unreliable ("Village" appears
+  in every world). Design a strategy for cross-source imports where
+  neither GUID nor exact coordinates are a reliable signal.
+
 ---
 
 ## Phase 9 — Live Waypoint Sync (Planned)
@@ -187,6 +192,21 @@ Deferred until the mod is feature-complete and ready to publish.
   directly, `cf-cli`, or the `itsmeow/curseforge-upload` action.
   Will need a CurseForge API token stored as a repo secret.
 
+- [ ] **Issue templates** — create `.github/ISSUE_TEMPLATE/` templates
+  for feature requests and bug reports.
+
+---
+
+## Phase 12 — Companion Tooling (Planned)
+
+- [ ] **JSON schema** — define a JSON schema for the waypoints.json
+  format to enable editor autocomplete and validation of hand-crafted
+  import files.
+
+- [ ] **Format conversion script** — Python script to convert waypoint
+  data from other formats (JourneyMap `.csv`, other mod exports) into
+  this mod's JSON format.
+
 ---
 
 ## Notes
@@ -197,3 +217,7 @@ Deferred until the mod is feature-complete and ready to publish.
   plain JSON without any mod tooling.
 - The `WaypointData.dat` NBT files should never be parsed directly by
   this mod; use the API exclusively.
+- [ ] **NeoForge GameTest** — research the GameTest framework
+  (`./gradlew runGameTestServer`) for in-game integration tests.
+  Useful for verifying command registration and end-to-end API
+  behavior; would complement the current JUnit 5 unit tests.

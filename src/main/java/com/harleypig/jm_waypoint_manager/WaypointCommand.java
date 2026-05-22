@@ -26,6 +26,7 @@ public class WaypointCommand {
   private static final String FILENAME_ARG = "filename";
   private static final String DEBUG_LITERAL = "debug";
 
+  /** Registers the {@code /wm} command tree; wired to {@link RegisterCommandsEvent}. */
   public static void onRegisterCommands(RegisterCommandsEvent event) {
     register(event.getDispatcher());
   }
@@ -248,6 +249,7 @@ public class WaypointCommand {
     return added;
   }
 
+  /** Returns the command arg if non-blank, the config default if non-blank, or null. */
   @Nullable
   static String resolveFilename(@Nullable String commandFilename, String configDefault) {
     if (commandFilename != null && !commandFilename.isEmpty()) {
@@ -256,6 +258,7 @@ public class WaypointCommand {
     return !configDefault.isEmpty() ? configDefault : null;
   }
 
+  /** Returns an error string if filename contains path separators, or null if valid. */
   @Nullable
   static String validateFilename(String filename) {
     if (filename.contains("/") || filename.contains("\\")) {
