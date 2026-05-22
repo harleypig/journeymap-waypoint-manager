@@ -192,6 +192,11 @@ Deferred until the mod is feature-complete and ready to publish.
   directly, `cf-cli`, or the `itsmeow/curseforge-upload` action.
   Will need a CurseForge API token stored as a repo secret.
 
+- [ ] **Tag protection ruleset** — create a GitHub ruleset targeting
+  `refs/tags/v*` that prevents deletion and force-pushes of release
+  tags. Use the template in `private_dotfiles/github-rulesets` (create
+  template there first if it doesn't exist).
+
 - [ ] **Issue templates** — create `.github/ISSUE_TEMPLATE/` templates
   for feature requests and bug reports.
 
