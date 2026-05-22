@@ -110,7 +110,8 @@ public class WaypointCommand {
       return 0;
     }
 
-    String effectiveFilename = resolveFilename(filename);
+    String effectiveFilename =
+        resolveFilename(filename, WaypointManagerConfig.DEFAULT_FILENAME.get());
     if (effectiveFilename == null) {
       ctx.getSource()
           .sendFailure(
@@ -182,7 +183,8 @@ public class WaypointCommand {
       return 0;
     }
 
-    String effectiveFilename = resolveFilename(filename);
+    String effectiveFilename =
+        resolveFilename(filename, WaypointManagerConfig.DEFAULT_FILENAME.get());
     if (effectiveFilename == null) {
       ctx.getSource()
           .sendFailure(
@@ -247,16 +249,15 @@ public class WaypointCommand {
   }
 
   @Nullable
-  private static String resolveFilename(@Nullable String commandFilename) {
+  static String resolveFilename(@Nullable String commandFilename, String configDefault) {
     if (commandFilename != null && !commandFilename.isEmpty()) {
       return commandFilename;
     }
-    String configDefault = WaypointManagerConfig.DEFAULT_FILENAME.get();
-    return (configDefault != null && !configDefault.isEmpty()) ? configDefault : null;
+    return !configDefault.isEmpty() ? configDefault : null;
   }
 
   @Nullable
-  private static String validateFilename(String filename) {
+  static String validateFilename(String filename) {
     if (filename.contains("/") || filename.contains("\\")) {
       return "Filename must not contain path separators (/ or \\).";
     }

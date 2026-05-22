@@ -346,4 +346,155 @@ class WaypointSerializerTest {
       verify(existingGroup).addWaypoint(created);
     }
   }
+
+  @Test
+  void fromJson_debugLog_calledForAddedWaypoint() {
+    IClientAPI api = mock(IClientAPI.class);
+
+    when(api.getWaypoints(MOD_ID)).thenReturn(new ArrayList<>());
+    when(api.getAllWaypoints()).thenReturn(new ArrayList<>());
+
+    Waypoint created = mock(Waypoint.class);
+
+    when(created.getGuid()).thenReturn("new-guid");
+
+    String json =
+        """
+        {
+          "minecraft:overworld": {
+            "": [
+              {
+                "name": "Spawn",
+                "x": 0, "y": 64, "z": 0,
+                "primaryDimension": "minecraft:overworld",
+                "dimensions": ["minecraft:overworld"]
+              }
+            ]
+          }
+        }
+        """;
+
+    JsonObject root = WaypointSerializer.fromJsonString(json);
+    List<String> logged = new ArrayList<>();
+
+    try (MockedStatic<WaypointFactory> factory = mockStatic(WaypointFactory.class)) {
+      factory
+          .when(
+              () ->
+                  WaypointFactory.createWaypoint(
+                      eq(MOD_ID), any(BlockPos.class), eq("Spawn"), eq(DIM), eq(true)))
+          .thenReturn(created);
+
+      WaypointSerializer.fromJson(root, api, MOD_ID, logged::add);
+    }
+
+    assertEquals(1, logged.size());
+    assertTrue(logged.get(0).contains("add"), "log message should mention 'add'");
+    assertTrue(logged.get(0).contains("Spawn"), "log message should include waypoint name");
+  }
+
+  @Test
+  void fromJson_debugLog_calledForGuidDuplicate() {
+    Waypoint existing = mock(Waypoint.class);
+
+    when(existing.getGuid()).thenReturn("dup-guid");
+    when(existing.getName()).thenReturn("Spawn");
+    when(existing.getX()).thenReturn(0);
+    when(existing.getY()).thenReturn(64);
+    when(existing.getZ()).thenReturn(0);
+    when(existing.getPrimaryDimension()).thenReturn(DIM);
+
+    IClientAPI api = mock(IClientAPI.class);
+
+    doReturn(List.of(existing)).when(api).getWaypoints(MOD_ID);
+    doReturn(List.of(existing)).when(api).getAllWaypoints();
+
+    String json =
+        """
+        {
+          "minecraft:overworld": {
+            "": [
+              {
+                "guid": "dup-guid",
+                "name": "Spawn",
+                "x": 0, "y": 64, "z": 0,
+                "primaryDimension": "minecraft:overworld",
+                "dimensions": ["minecraft:overworld"]
+              }
+            ]
+          }
+        }
+        """;
+
+    JsonObject root = WaypointSerializer.fromJsonString(json);
+    List<String> logged = new ArrayList<>();
+
+    WaypointSerializer.fromJson(root, api, MOD_ID, logged::add);
+
+    assertEquals(1, logged.size());
+    assertTrue(logged.get(0).contains("skip"), "log message should mention 'skip'");
+  }
+
+  @Test
+  void fromJson_debugLog_calledForPositionalDuplicate() {
+    Waypoint existing = mock(Waypoint.class);
+
+    when(existing.getGuid()).thenReturn("other-guid");
+    when(existing.getName()).thenReturn("Spawn");
+    when(existing.getX()).thenReturn(0);
+    when(existing.getY()).thenReturn(64);
+    when(existing.getZ()).thenReturn(0);
+    when(existing.getPrimaryDimension()).thenReturn(DIM);
+
+    IClientAPI api = mock(IClientAPI.class);
+
+    when(api.getWaypoints(MOD_ID)).thenReturn(new ArrayList<>());
+    doReturn(List.of(existing)).when(api).getAllWaypoints();
+
+    String json =
+        """
+        {
+          "minecraft:overworld": {
+            "": [
+              {
+                "name": "Spawn",
+                "x": 0, "y": 64, "z": 0,
+                "primaryDimension": "minecraft:overworld",
+                "dimensions": ["minecraft:overworld"]
+              }
+            ]
+          }
+        }
+        """;
+
+    JsonObject root = WaypointSerializer.fromJsonString(json);
+    List<String> logged = new ArrayList<>();
+
+    WaypointSerializer.fromJson(root, api, MOD_ID, logged::add);
+
+    assertEquals(1, logged.size());
+    assertTrue(logged.get(0).contains("skip"), "log message should mention 'skip'");
+  }
+
+  @Test
+  void fromJson_noOpDebugLog_doesNotThrow() {
+    IClientAPI api = mock(IClientAPI.class);
+
+    when(api.getWaypoints(MOD_ID)).thenReturn(new ArrayList<>());
+    when(api.getAllWaypoints()).thenReturn(new ArrayList<>());
+
+    String json =
+        """
+        {
+          "minecraft:overworld": {
+            "": []
+          }
+        }
+        """;
+
+    JsonObject root = WaypointSerializer.fromJsonString(json);
+
+    // Should complete without throwing even with no-op consumer.
+    WaypointSerializer.fromJson(root, api, MOD_ID, ignored -> {});
+  }
 }
