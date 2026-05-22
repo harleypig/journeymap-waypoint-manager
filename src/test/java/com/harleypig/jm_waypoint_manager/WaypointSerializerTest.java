@@ -149,7 +149,7 @@ class WaypointSerializerTest {
                       eq(MOD_ID), any(BlockPos.class), eq("Spawn"), eq(DIM), eq(true)))
           .thenReturn(created);
 
-      int[] result = WaypointSerializer.fromJson(root, api, MOD_ID);
+      int[] result = WaypointSerializer.fromJson(root, api, MOD_ID, ignored -> {});
 
       assertEquals(1, result[0]);
       assertEquals(0, result[1]);
@@ -194,7 +194,7 @@ class WaypointSerializerTest {
 
     JsonObject root = WaypointSerializer.fromJsonString(json);
 
-    int[] result = WaypointSerializer.fromJson(root, api, MOD_ID);
+    int[] result = WaypointSerializer.fromJson(root, api, MOD_ID, ignored -> {});
 
     assertEquals(0, result[0]);
     assertEquals(1, result[1]);
@@ -238,7 +238,7 @@ class WaypointSerializerTest {
 
     JsonObject root = WaypointSerializer.fromJsonString(json);
 
-    int[] result = WaypointSerializer.fromJson(root, api, MOD_ID);
+    int[] result = WaypointSerializer.fromJson(root, api, MOD_ID, ignored -> {});
 
     assertEquals(0, result[0]);
     assertEquals(1, result[1]);
@@ -288,7 +288,7 @@ class WaypointSerializerTest {
                       eq(MOD_ID), any(BlockPos.class), eq("Base"), eq(DIM), eq(true)))
           .thenReturn(created);
 
-      int[] result = WaypointSerializer.fromJson(root, api, MOD_ID);
+      int[] result = WaypointSerializer.fromJson(root, api, MOD_ID, ignored -> {});
 
       assertEquals(1, result[0]);
       verify(newGroup).setPersistent(true);
@@ -339,7 +339,7 @@ class WaypointSerializerTest {
                       eq(MOD_ID), any(BlockPos.class), eq("Base"), eq(DIM), eq(true)))
           .thenReturn(created);
 
-      int[] result = WaypointSerializer.fromJson(root, api, MOD_ID);
+      int[] result = WaypointSerializer.fromJson(root, api, MOD_ID, ignored -> {});
 
       assertEquals(1, result[0]);
       verify(api, never()).addWaypointGroup(any());
