@@ -131,9 +131,9 @@ invocation — `./gradlew build` stays clean.
 ## Phase 8 — Config, Logging, and Debug
 
 - [ ] **File path migration** — move waypoint files from
-  `config/jm_waypoint_manager/` to
-  `<instance>/jm_waypoint_manager/waypoints/`. Filenames only (no
-  path separators); include a slash in the input should be an error.
+  `config/jm_waypoint_manager/` to `<instance>/jm_waypoint_manager/`.
+  Filenames only (no path separators); a slash in the input is an
+  error.
 
 - [ ] **Config** (`config/jm_waypoint_manager.toml`) — NeoForge
   `ModConfigSpec`. Default import/export filename (shared, set at
