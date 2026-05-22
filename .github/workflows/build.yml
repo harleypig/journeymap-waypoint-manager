@@ -63,7 +63,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - uses: pre-commit/action@v3.0.1
+      - name: Run pre-commit
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files
 
   ci:
     name: CI
